@@ -209,12 +209,12 @@ class StateTomography(object):
 
 if __name__=="__main__":
     # Create data
-    tomography = StateTomography(num_qubits=2, num_measure=75, num_datapoints=100000)
+    tomography = StateTomography(num_qubits=2, num_measure=75, num_datapoints=1000)
     # Saves data
-    tomography.data.save('tomography')
+    tomography.data.save('Xtomography')
     # Saves the mixed states that yielded the data
-    tomography.save_truth('tomography_truth')
+    tomography.save_truth('Xtomography_truth')
     # Saves the set of measurement bases chosen at the beginning
-    tomography.save_measurements('tomography_measurements')
+    tomography.save_measurements('Xtomography_measurements')
     # Saves the paramterized data for hypothesis testing.
-    tomography.save_hypothesis('tomography_hypothesis')
+    tomography.save_hypothesis('Xtomography_hypothesis')

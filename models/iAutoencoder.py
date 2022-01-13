@@ -204,3 +204,71 @@ class Selection(nn.Module):
         std = x.std(dim=0).expand_as(x)
         sample = x + std * torch.exp(selectors) * rand
         return sample
+
+######################TEST
+
+class StrFDecoder(nn.Module):
+    """
+    """
+    def __init__(self, dim_latent, dim_dense, dim_output):
+        super(StrFDecoder, self).__init__()
+        self.selection = nn.ModuleList()
+        self.trafo = nn.ModuleList()
+        self.decoding = nn.ModuleList()
+        dim_hidden = [dim_latent] + dim_dense + [dim_output]
+        for l in range(len(dim_hidden)-1):
+            modules = []
+            modules.append(nn.Linear(dim_hidden[l], dim_hidden[l+1]))
+            # no latent layer on last layer #TODO: try other things?
+            if l != len(dim_hidden)-2:
+                modules.append(nn.ELU())
+                # selection neurons
+                self.selection.append(Selection(dim_latent))
+                # str-trf units
+                self.trafo.append(StrTfm(dim_hidden[l], dim_latent))
+            # decoding layers
+            self.decoding.append(nn.Sequential(*modules))
+
+
+    def forward(self, x):
+        """
+        """
+        out = torch.ones(*x.size())
+        for i, layer in enumerate(self.decoding):
+            if i < len(self.decoding)-1:
+                rand_batch = torch.randn((x.size(0), self.selection[i].selectors.size(0)))
+                latent = self.selection[i](x, rand_batch)
+                out = self.trafo[i](out, latent)
+            out = layer(out)
+        
+        return out
+
+
+
+class StrTfm(nn.Module):
+    """
+    """
+    def __init__(self, dim_input, dim_latent, dim_dense=[100]):
+        super(StrTfm, self).__init__()
+    
+        # build layers transformation layers
+        dim_hidden = [dim_latent] + dim_dense + [2*dim_input]
+        self.trafo = nn.ModuleList()
+        for l in range(len(dim_hidden)-1):
+            modules = []
+            modules.append(nn.Linear(dim_hidden[l], dim_hidden[l+1]))
+            modules.append(nn.ELU())
+            self.trafo.append(nn.Sequential(*modules))
+    
+    def forward(self, x, latent):
+        """
+        """
+        for dense in self.trafo:
+            latent = dense(latent)
+        size = latent.size()
+        zs = latent[:, :int(size[1]/2)]
+        zb = latent[:, int(size[1]/2):]
+        x = zs * x + zb
+
+        return x
+    

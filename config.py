@@ -5,7 +5,7 @@ class Config:
     # Data configurations
     ####################################
 
-    DATA_FILE = 'tomography' # root name of the data file (not including labels and file type)
+    DATA_FILE = 'qcausal' # root name of the data file (not including labels and file type)
 
     NUM_INTERVENTIONS = 3 # number of total interventions
 
@@ -23,11 +23,11 @@ class Config:
 
     ENC_DIM = [512, 256] # dimensions of the fully-connected layers of the encoder
 
-    DEC_DIM = [256, 512] # dimensions of the fully-connected layers of all decoders
+    DEC_DIM = [100, 100, 256] # dimensions of the fully-connected layers of all decoders
 
-    LATENT_DIM = 20 # number of neurons in the latent space 
+    LATENT_DIM = 8 # number of neurons in the latent space 
 
-    LEARNING_RATE = 0.0005 # learning rate for training
+    LEARNING_RATE = 0.0006 # learning rate for training
 
     LOSS = torch.nn.MSELoss() # loss function
 
@@ -43,7 +43,7 @@ class Config:
 
     DISCOUNT_MIN_LOSS = 0.00001 # discount for the minimization loss
 
-    DISCOUNT_SEL_LOSS = 0.00006 # discount for the disentangling (or selection) loss
+    DISCOUNT_SEL_LOSS = 0.00005 # discount for the disentangling (or selection) loss
 
     ####################################
     # Output configurations
