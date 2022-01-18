@@ -83,7 +83,7 @@ class DSprites():
         imgs = self.dlib_data.sample_observations_from_factors(latent_factors,random_state)
         # imgs = imgs.reshape(-1, np.prod(imgs.shape[1:])) # TODO: remove flatten
 
-        data_list.append(TensorDataset(torch.from_numpy(imgs.reshape(len(imgs),1,64,64)))) # TODO: ok to reshape?
+        data_list.append(TensorDataset(torch.from_numpy(imgs.swapaxes(1,3).swapaxes(2,3)))) # TODO: NOT ok to reshape: https://stackoverflow.com/questions/53623472/how-do-i-display-a-single-image-in-pytorch/55196345
 
         return data_list
 
