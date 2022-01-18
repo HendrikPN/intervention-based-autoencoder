@@ -19,7 +19,7 @@ class DataHandler(object):
         self.datasets = ConcatDataset(*datasets)
         self.num_interventions = num_interventions
 
-    def load(self, file_name):
+    def load(self, file_name, device="cpu"):
         """
         Loads all data files corresponding to different interventions.
 
@@ -27,10 +27,11 @@ class DataHandler(object):
 
         Args:
             file_name (str): Name of file as which data is to be loaded.
+            device (str): Storage location. Default: "cpu"
         """
         input_data = []
         for i in range(self.num_interventions):
-            data = torch.load(io.data_path + file_name + '_' + str(i) + '.pth')
+            data = torch.load(io.data_path + file_name + '_' + str(i) + '.pth', map_location=device)
             if type(data) == torch.Tensor:
                 if i == 0:
                     # assuming data has always the same size.
@@ -67,6 +68,8 @@ class ConcatDataset(torch.utils.data.Dataset):
         # `list` of `int`: shape of the data, assuming one dimensional arrays.
         # TODO: Always handle TensorDataset (this is not needed...)
         self.sizes = [data.size()[1] if type(data)==torch.Tensor else None for data in datasets]
+        if len(self.sizes) > 0 and self.sizes[0]==None:
+            self.sizes = list(datasets[0][0][0].size())
 
     def __getitem__(self, i):
         return tuple(d[i] for d in self.datasets)

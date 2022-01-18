@@ -5,9 +5,11 @@ class Config:
     # Data configurations
     ####################################
 
-    DATA_FILE = 'tomography' # root name of the data file (not including labels and file type)
+    DATA_FILE = 'dsprites' # root name of the data file (not including labels and file type)
 
-    NUM_INTERVENTIONS = 3 # number of total interventions
+    NUM_INTERVENTIONS = 4 # number of total interventions
+
+    DEVICE = "cuda" # device to run it on
 
     ####################################
     # Model configurations
@@ -25,11 +27,29 @@ class Config:
 
     DEC_DIM = [256, 512] # dimensions of the fully-connected layers of all decoders
 
-    LATENT_DIM = 20 # number of neurons in the latent space 
+    LATENT_DIM = 10 # number of neurons in the latent space 
 
     LEARNING_RATE = 0.0005 # learning rate for training
 
     LOSS = torch.nn.MSELoss() # loss function
+
+    ####################################
+    # Convolutional model configurations
+    ####################################
+
+    CONV = True
+
+    ENC_DIM = [128, 128] # dimensions of the fully-connected layers of the encoder
+
+    ENC_CHANNELS = [5, 4]
+
+    ENC_KERNELS = [4, 4]
+
+    DEC_DIM = [128, 128] # dimensions of the fully-connected layers of all decoders
+
+    DEC_CHANNELS = [32, 1]
+
+    DEC_KERNELS = [12, 53]
 
     ####################################
     # Training configurations

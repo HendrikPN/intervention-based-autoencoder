@@ -4,7 +4,11 @@ import numpy as np
 
 from config import Config
 from examples.utils.data_handler import DataHandler
-from models.iAutoencoder import iAutoencoder
+
+if Config.CONV:
+    from models.iAutoencoder import iConvAE
+else:
+    from models.iAutoencoder import iAutoencoder
 
 ####################################
 # Delete previous save files
@@ -26,9 +30,9 @@ if Config.SAVE_LOSS:
 
 # load data
 data_handler = DataHandler(Config.NUM_INTERVENTIONS)
-data_handler.load(Config.DATA_FILE)
+data_handler.load(Config.DATA_FILE, device=Config.DEVICE) # TODO: CUDA
 #int: The size of the input data.
-DATA_SIZE = data_handler.datasets.sizes[0]
+DATA_SIZE = data_handler.datasets.sizes
 num_interventions = len(data_handler.datasets.datasets)
 assert Config.NUM_INTERVENTIONS == num_interventions, 'Your number of interventions in your dataset is not what you expected.'
 
@@ -36,8 +40,8 @@ assert Config.NUM_INTERVENTIONS == num_interventions, 'Your number of interventi
 train_loader = torch.utils.data.DataLoader(data_handler.datasets,
                                            batch_size=Config.BATCH_SIZE, 
                                            shuffle=True,
-                                           num_workers=1, 
-                                           pin_memory=True
+                                           num_workers=0
+                                        #    pin_memory=True # TODO: CUDA
                                           )
 
 ####################################
@@ -45,7 +49,13 @@ train_loader = torch.utils.data.DataLoader(data_handler.datasets,
 ####################################
 
 # intervention-based autoencoder model
-iae = iAutoencoder(DATA_SIZE, Config.ENC_DIM, Config.DEC_DIM, Config.LATENT_DIM, Config.NUM_INTERVENTIONS)
+if Config.CONV:
+    iae = iConvAE(DATA_SIZE, Config.LATENT_DIM, Config.NUM_INTERVENTIONS, 
+                  Config.ENC_DIM, Config.ENC_CHANNELS, Config.ENC_KERNELS,
+                  Config.DEC_DIM, Config.DEC_CHANNELS, Config.DEC_KERNELS)
+    iae.to(torch.device("cuda")) # TODO: CUDA
+else:
+    iae = iAutoencoder(*DATA_SIZE, Config.ENC_DIM, Config.DEC_DIM, Config.LATENT_DIM, Config.NUM_INTERVENTIONS)
 # load model if desired
 if Config.LOAD_MODEL:
     loaded_dict = torch.load('results/models/' + Config.LOAD_MODEL_FILE + '.pth')
@@ -75,9 +85,9 @@ for e in range(Config.NUM_EPOCHS):
         loss_sum = 0.
         for i, data in enumerate(data_multi):
             # output of iAE
-            out = iae(data, i)
+            out = iae(data[0], i)
             # loss for input recreation
-            loss_rec = Config.LOSS(out, data) * Config.DISCOUNTS_REC_LOSS[i]
+            loss_rec = Config.LOSS(out, data[0]) * Config.DISCOUNTS_REC_LOSS[i]
             # print(loss_rec)
             # loss for representation minimization
             loss_min = -iae.encoder.selection.selectors.sum() * 1./Config.LATENT_DIM
