@@ -52,7 +52,7 @@ class FilterEncoder(nn.Module):
             raise ValueError(f'Input batch size is incorrect: {x.size()}. Requires batch size > 1.')
         # (0) Create random batch for selection neurons.
         if x.is_cuda:
-            rand_batch = torch.randn((x.size(0), self.selection.selectors.size(0))).to(torch.device("cuda")) # TODO CUDA
+            rand_batch = torch.cuda.FloatTensor(x.size(0), self.selection.selectors.size(0)).normal_() # TODO CUDA
         else:
             rand_batch = torch.randn((x.size(0), self.selection.selectors.size(0)))
         # (i) Input
@@ -114,7 +114,7 @@ class FilterDecoder(nn.Module):
         """
         # (0) Create random batch.
         if x.is_cuda:
-            rand_batch = torch.randn((x.size(0), self.selection.selectors.size(0))).to(torch.device("cuda")) # TODO CUDA
+            rand_batch = torch.cuda.FloatTensor(x.size(0), self.selection.selectors.size(0)).normal_() # TODO CUDA
         else:
             rand_batch = torch.randn((x.size(0), self.selection.selectors.size(0)))
         # (i) Input
@@ -184,7 +184,7 @@ class Selection(nn.Module):
             init_selectors (float): Initial value for selection neurons. Default: -10.
     """
 
-    def __init__(self, num_selectors, init_selectors=-10.):
+    def __init__(self, num_selectors, init_selectors=-2.):
         super(Selection, self).__init__()
         select = torch.Tensor([init_selectors for _ in range(num_selectors)])
         # torch.nn.parameter.Parameter: The selection neurons.

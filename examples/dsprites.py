@@ -31,10 +31,10 @@ class DSprites():
 
     Here we create separate datasets where the factors of variation are:
 
-    0 - (0,2,3)
-    1 - (1,2,3)
-    2 - (1,3,4)
-    3 - (0,1,2,3,4)
+    0 - (0,2,3) || (easy) (1,2,3) ? (2,3)
+    1 - (1,2,3) || (easy) (2,3,4) ? (3,4)
+    2 - (1,3,4) || (easy) (1,2,4) ? (2,4)
+    3 - (0,1,2,3,4) || (easy) (1,2,3,4)
 
     The other latent variables remain fixed. This choice is such that the 
     maximum dataset sizes are comparable.
@@ -44,16 +44,20 @@ class DSprites():
             num_datapoints (int): The size of each individual dataset.
 
     """
-    def __init__(self, num_datapoints=50000):
+    def __init__(self, num_datapoints=10000):
         self.num_datapoints = num_datapoints
         self.fixed_factors = np.repeat([[0, 0, 0, 0, 0, 0]], self.num_datapoints, axis=0) # not including the 0 at start
         self.dlib_data = dsprites.DSprites()
-        data_list = self.create_dataset()
+        data_list = self.create_dataset(simplified=True)
         self.data = DataHandler(4, datasets=data_list)
 
-    def create_dataset(self):
+    def create_dataset(self, simplified=True):
         """
         Creates the datasets for training from `disentanglement_lib`.
+
+        Args:
+            *kwargs
+                simplified (bool): Fixes elliptic shape if set to true. Default: True.
 
         Returns:
             data_list (list): List of `torch.TensorDataset`.
@@ -69,27 +73,33 @@ class DSprites():
             # latent_factors[:, i+4:] = self.fixed_factors[:, i+4:]
             # imgs = self.dlib_data.sample_observations_from_factors(latent_factors,random_state)
 
-        fixed_indices = [[0,2,5],[0,1,5],[0,1,3]] # make sure sizes of datasets are comparable
+        fixed_indices = [[0,1,2,5],[0,1,2,4],[0,1,2,3]] if simplified else [[0,2,5],[0,1,5],[0,1,3]] # make sure sizes of datasets are comparable # 0,1,2,5 # 0,1,3,4,5 # NOTE: we fixed 2 now!
         for i_list in fixed_indices:
             latent_factors = self.dlib_data.state_space.sample_latent_factors(self.num_datapoints, random_state)
             latent_factors[:, i_list] = self.fixed_factors[:, i_list]
-            imgs = self.dlib_data.sample_observations_from_factors(latent_factors,random_state)
-            # imgs = imgs.reshape(-1, np.prod(imgs.shape[1:])) # TODO: remove flatten
+            # imgs = self.dlib_data.sample_observations_from_factors(latent_factors,random_state).swapaxes(1,3).swapaxes(2,3) # INFO: NOT ok to reshape: https://stackoverflow.com/questions/53623472/how-do-i-display-a-single-image-in-pytorch/55196345
+            imgs = self.dlib_data.sample_observations_from_factors(latent_factors,random_state) # TODO: remove flatten
+            imgs = imgs.reshape(-1, np.prod(imgs.shape[1:])) # TODO: remove flatten
 
-            data_list.append(TensorDataset(torch.from_numpy(imgs.reshape(len(imgs),1,64,64)))) # TODO: ok to reshape?
+            data_list.append(TensorDataset(torch.from_numpy(imgs))) 
 
         # full data
         latent_factors = self.dlib_data.state_space.sample_latent_factors(self.num_datapoints, random_state)
-        imgs = self.dlib_data.sample_observations_from_factors(latent_factors,random_state)
-        # imgs = imgs.reshape(-1, np.prod(imgs.shape[1:])) # TODO: remove flatten
+        if simplified:
+            latent_factors[:, 2] = self.fixed_factors[:, 2] # NOTE: we fixed 2 now!
+        # imgs = self.dlib_data.sample_observations_from_factors(latent_factors,random_state).swapaxes(1,3).swapaxes(2,3) # INFO: NOT ok to reshape: https://stackoverflow.com/questions/53623472/how-do-i-display-a-single-image-in-pytorch/55196345
+        imgs = self.dlib_data.sample_observations_from_factors(latent_factors,random_state) # TODO: remove flatten
+        imgs = imgs.reshape(-1, np.prod(imgs.shape[1:])) # TODO: remove flatten
 
-        data_list.append(TensorDataset(torch.from_numpy(imgs.swapaxes(1,3).swapaxes(2,3)))) # TODO: NOT ok to reshape: https://stackoverflow.com/questions/53623472/how-do-i-display-a-single-image-in-pytorch/55196345
+        data_list.append(TensorDataset(torch.from_numpy(imgs))) 
 
         return data_list
 
-    def save_hypothesis(self, file_name):
+    def save_hypothesis(self, file_name, simplified=True):
         """
         Creates and saves data for hypothesis testing of a representation.
+
+        If simplified we may fix one (or two?) additional indices.
 
         Args:
             file_name (str): The name of the file saved in ./data
@@ -99,12 +109,17 @@ class DSprites():
         for index, n in enumerate(self.dlib_data.factor_sizes):
             if index == 0:
                 continue
-            data = torch.zeros(n, *self.dlib_data.data_shape)
+            if simplified and (index == 1 or index == 2): # NOTE: excluded 2 indices
+                continue
+            label = index - 1 if not simplified else index - 3 # NOTE: excluded 2 indices, otherwise index - 2
+            data = torch.zeros(n, np.prod(self.dlib_data.data_shape)) # TODO: remove flatten: torch.zeros(n, *self.dlib_data.data_shape) 
             for value in range(n):
                 factor = fixed_factor.copy()
+                factor[0][index] = value
                 img = self.dlib_data.sample_observations_from_factors(factor, random_state)
+                img = img.reshape(-1, np.prod(img.shape)) # TODO: remove flatten
                 data[value] = torch.from_numpy(img)
-            torch.save(data, "./data/" + file_name + "_" + str(index-1) + ".pth")
+            torch.save(data, "./data/" + file_name + "_" + str(label) + ".pth")
 
 if __name__ == "__main__":
     dsprites_data = DSprites()

@@ -1,6 +1,7 @@
 import sys, os
 import torch
 import numpy as np
+import torchvision
 
 from config import Config
 from examples.utils.data_handler import DataHandler
@@ -9,6 +10,8 @@ if Config.CONV:
     from models.iAutoencoder import iConvAE
 else:
     from models.iAutoencoder import iAutoencoder
+
+to_PIL = torchvision.transforms.ToPILImage()
 
 ####################################
 # Delete previous save files
@@ -53,9 +56,10 @@ if Config.CONV:
     iae = iConvAE(DATA_SIZE, Config.LATENT_DIM, Config.NUM_INTERVENTIONS, 
                   Config.ENC_DIM, Config.ENC_CHANNELS, Config.ENC_KERNELS,
                   Config.DEC_DIM, Config.DEC_CHANNELS, Config.DEC_KERNELS)
-    iae.to(torch.device("cuda")) # TODO: CUDA
+    iae.to(torch.device(Config.DEVICE)) # TODO: CUDA
 else:
     iae = iAutoencoder(*DATA_SIZE, Config.ENC_DIM, Config.DEC_DIM, Config.LATENT_DIM, Config.NUM_INTERVENTIONS)
+    iae.to(torch.device(Config.DEVICE)) # TODO: CUDA
 # load model if desired
 if Config.LOAD_MODEL:
     loaded_dict = torch.load('results/models/' + Config.LOAD_MODEL_FILE + '.pth')
@@ -124,6 +128,11 @@ for e in range(Config.NUM_EPOCHS):
         for j in reversed(range(1, num_interventions+1)):
             print(f'Current local filter {num_interventions-j}: {data_sel[-j]}')
         sys.stdout.flush()
+        # show last datapoint
+        # img_in = to_PIL(data[0][0])
+        # img_out = to_PIL(out[0])
+        # img_in.show()
+        # img_out.show()
     # save losses
     if Config.SAVE_LOSS:
         with open('results/' + Config.LOSS_FILE + '.txt', 'a') as loss_file, \

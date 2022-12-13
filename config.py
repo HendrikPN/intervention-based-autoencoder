@@ -27,25 +27,25 @@ class Config:
 
     DEC_DIM = [256, 512] # dimensions of the fully-connected layers of all decoders
 
-    LATENT_DIM = 10 # number of neurons in the latent space 
+    LATENT_DIM = 3 # number of neurons in the latent space 
 
-    LEARNING_RATE = 0.0005 # learning rate for training
+    LEARNING_RATE = 0.0006#0.0008 # 0.001 # learning rate for training
 
-    LOSS = torch.nn.MSELoss() # loss function
+    LOSS = torch.nn.MSELoss() #torch.nn.MSELoss()# # loss function
 
     ####################################
     # Convolutional model configurations
     ####################################
 
-    CONV = True
+    CONV = False
 
-    ENC_DIM = [128, 128] # dimensions of the fully-connected layers of the encoder
+    ENC_DIM = [512, 256] # dimensions of the fully-connected layers of the encoder
 
     ENC_CHANNELS = [5, 4]
 
     ENC_KERNELS = [4, 4]
 
-    DEC_DIM = [128, 128] # dimensions of the fully-connected layers of all decoders
+    DEC_DIM = [256, 512] # dimensions of the fully-connected layers of all decoders
 
     DEC_CHANNELS = [32, 1]
 
@@ -55,15 +55,15 @@ class Config:
     # Training configurations
     ####################################
 
-    NUM_EPOCHS = 40 # number of epochs
+    NUM_EPOCHS = 500 # number of epochs
 
-    BATCH_SIZE = 100 # training batch size
+    BATCH_SIZE = 300 # training batch size
 
-    DISCOUNTS_REC_LOSS = [1. for i in range(NUM_INTERVENTIONS)] # discount for the recreation loss of each intervention
+    DISCOUNTS_REC_LOSS = [1.,1.,0.58,1.0]#[1. for i in range(NUM_INTERVENTIONS)] #[1.,1.,0.55,1.0] # discount for the recreation loss of each intervention
 
-    DISCOUNT_MIN_LOSS = 0.00001 # discount for the minimization loss
+    DISCOUNT_MIN_LOSS = 0.#0.003 # discount for the minimization loss
 
-    DISCOUNT_SEL_LOSS = 0.00006 # discount for the disentangling (or selection) loss
+    DISCOUNT_SEL_LOSS = 0.003#0.004#0.0034#0.0096 # discount for the disentangling (or selection) loss
 
     ####################################
     # Output configurations

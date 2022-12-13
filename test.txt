@@ -1,0 +1,129 @@
+After 20 epochs
+    
+    # 1
+
+    0.0030151493847370148, 0.00281928782351315, 0.00046783112338744104, 0.01549588143825531]
+
+    CONV = True
+
+    ENC_DIM = [128, 128] # dimensions of the fully-connected layers of the encoder
+
+    ENC_CHANNELS = [5, 4]
+
+    ENC_KERNELS = [4, 4]
+
+    DEC_DIM = [128, 128] # dimensions of the fully-connected layers of all decoders
+
+    DEC_CHANNELS = [32, 1]
+
+    DEC_KERNELS = [12, 53]
+
+    # 2
+
+    ENC_DIM = [128, 128] # dimensions of the fully-connected layers of the encoder
+
+    ENC_CHANNELS = [32, 16]
+
+    ENC_KERNELS = [4, 4]
+
+    DEC_DIM = [128, 128] # dimensions of the fully-connected layers of all decoders
+
+    DEC_CHANNELS = [32, 1]
+
+    DEC_KERNELS = [12, 53]
+
+    [0.0024656890891492367, 0.0026929019950330257, 0.00047450565034523606, 0.01336936466395855]
+
+    # 3 (more dens cf #1 + 64)
+
+    [0.005439211614429951, 0.008435660041868687, 0.00028054649010300636, 0.020723192021250725]
+
+    # 4 
+
+    ENC_DIM = [128, 128] # dimensions of the fully-connected layers of the encoder
+
+    ENC_CHANNELS = [5, 4]
+
+    ENC_KERNELS = [4, 4]
+
+    DEC_DIM = [128, 128] # dimensions of the fully-connected layers of all decoders
+
+    DEC_CHANNELS = [1]
+
+    DEC_KERNELS = [64]
+
+    #5 
+
+    ENC_DIM = [512, 256] # dimensions of the fully-connected layers of the encoder
+
+    ENC_CHANNELS = [5, 4]
+
+    ENC_KERNELS = [4, 4]
+
+    DEC_DIM = [256, 512] # dimensions of the fully-connected layers of all decoders
+
+    DEC_CHANNELS = [32, 1]
+
+    DEC_KERNELS = [12, 53]
+
+    [0.0023838202469050884, 0.002977983793243766, 0.00010038833715952933, 0.017693758010864258]
+
+     #5 LR = 0.001
+
+     [0.000991066568531096, 0.0018650077981874347, 0.00011972652282565832, 0.011567370966076851]
+
+
+# DENSE
+
+    ENC_DIM = [1024, 512, 512, 512, 256] # dimensions of the fully-connected layers of the encoder
+    DEC_DIM = [256, 512, 512, 512, 1024] # dimensions of the fully-connected layers of all decoders
+    LEARNING_RATE = 0.0005 # learning rate for training
+
+    [0.0006631609867326915, 0.0009174986043944955, 0.0005508067552000284, 0.002467359881848097]
+
+
+    LEARNING_RATE = 0.0001 # learning rate for training
+
+    [0.0008075910736806691, 0.0014464437263086438, 0.0008441103855147958, 0.004098351579159498]
+
+    # TOP
+    LEARNING_RATE = 0.001 # learning rate for training
+    Current total loss: 0.0016180091770365834
+    [0.0006299735978245735, 0.0009302660473622382, 0.0007143537513911724, 0.0024215057492256165] 
+
+    LEARNING_RATE = 0.002 # learning rate for training
+    Current total loss: 0.0020577064715325832
+    Current recreation losses: [0.0009394229855388403, 0.0013527959818020463, 0.0013348024804145098, 0.003159142564982176]
+
+    LEARNING_RATE = 0.0008 # learning rate for training
+    Current total loss: 0.0017249933443963528
+    [0.0006074076518416405, 0.001121381064876914, 0.000645576452370733, 0.0028847013600170612]
+
+    ENC_DIM = [1024, 512, 512, 256] # dimensions of the fully-connected layers of the encoder
+    DEC_DIM = [256, 512, 512, 1024] # dimensions of the fully-connected layers of all decoders
+    LEARNING_RATE = 0.001 # learning rate for training
+    Current total loss: 0.00189604377374053
+    [0.0007139471126720309, 0.0012105285422876477, 0.0009158545290119946, 0.002595441648736596]
+
+    ENC_DIM = [1024, 1024, 512, 512, 512, 256] # dimensions of the fully-connected layers of the encoder
+    DEC_DIM = [256, 512, 512, 512, 1024, 1024] # dimensions of the fully-connected layers of all decoders
+    LEARNING_RATE = 0.001 # learning rate for training
+    Current total loss: 0.0015367284649983048
+    [0.0005340553470887244, 0.0010412405245006084, 0.0006260903901420534, 0.0026128869503736496]
+
+    ENC_DIM = [1024, 1024, 512, 512, 512, 256] # dimensions of the fully-connected layers of the encoder
+    DEC_DIM = [256, 256, 512, 512, 512, 1024, 1024] # dimensions of the fully-connected layers of all decoders
+    LEARNING_RATE = 0.001 # learning rate for training
+    Current total loss: 0.0015887643676251173
+    [0.0007434597937390208, 0.0009907035855576396, 0.0006249870057217777, 0.00264031533151865]
+
+    ENC_DIM = [1024, 1024, 512, 512, 512, 256, 256] # dimensions of the fully-connected layers of the encoder
+    DEC_DIM = [256, 512, 512, 512, 1024, 1024] # dimensions of the fully-connected layers of all decoders
+    LEARNING_RATE = 0.0015 # learning rate for training
+    Current total loss: 0.0015887643676251173
+    [0.0007434597937390208, 0.0009907035855576396, 0.0006249870057217777, 0.00264031533151865]
+
+    Current total loss: 0.0016325775068253279
+    [0.0009017058764584363, 0.001056771376170218, 0.0005002469988539815, 0.0027644839137792587]
+
+    Only 3 interventions, no scale, only x,y,rotation
