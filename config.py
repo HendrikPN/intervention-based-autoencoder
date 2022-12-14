@@ -41,15 +41,15 @@ class Config:
 
     ENC_DIM = [128, 128] # dimensions of the fully-connected layers of the encoder
 
-    ENC_CHANNELS = [5, 4]
+    ENC_CHANNELS = [8, 16, 32]
 
-    ENC_KERNELS = [4, 4]
+    ENC_KERNELS = [4, 4, 2]
 
     DEC_DIM = [128, 128] # dimensions of the fully-connected layers of all decoders
 
-    DEC_CHANNELS = [32, 1]
+    DEC_CHANNELS = [16, 16, 1]
 
-    DEC_KERNELS = [12, 53]
+    DEC_KERNELS = [2, 2, 1]
 
     ####################################
     # Training configurations

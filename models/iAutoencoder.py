@@ -233,7 +233,7 @@ class FilterConvEncoder(nn.Module):
         for i in range(len(dim_channels)):
             self.convs.append(
                 nn.Sequential(
-                    nn.Conv2d(channels[i], channels[i+1], kernel_sizes[i]),
+                    nn.Conv2d(channels[i], channels[i+1], kernel_sizes[i]), #TODO: update torch for padding="same" support
                     nn.ELU(),
                     nn.MaxPool2d(2, 2)
                 )
@@ -257,6 +257,7 @@ class FilterConvEncoder(nn.Module):
         x = Variable(torch.rand(1, *shape))
         for conv in self.convs:
             x = conv(x)
+            print(x.data.size())
         x = x.view(x.size(0), -1)
         conv_size = x.data.size(1)
 
@@ -295,7 +296,7 @@ class FilterConvDecoder(nn.Module):
         kernel_sizes (:obj:`list` of :obj:`int`): Size of kernel per convolutional layer.
         dim_img (:obj:`list` of :obj:`int`): The size of the output image.
     """
-    def __init__(self, dim_latent, dim_dense, dim_channels, kernel_sizes, dim_img):
+    def __init__(self, dim_latent, dim_dense, dim_channels, kernel_sizes, dim_img, reshape=None):
         super(FilterConvDecoder, self).__init__()
 
         # Build standard FilterDecoder
@@ -303,13 +304,22 @@ class FilterConvDecoder(nn.Module):
         # Selection neurons from `FilterDecoder`
         self.selection = self.filter_decoder.selection
 
+        # How to reshape latent representation.
+        if reshape == None:
+            self.reshape = (dim_dense[-1], 1, 1)
+            channels = [dim_dense[-1]] + dim_channels
+        else:
+            self.reshape = reshape
+            channels = [reshape[0]] + dim_channels
+
         # Build convolutional layers
-        self.convsTransposed = nn.ModuleList()
-        channels = [dim_dense[-1]] + dim_channels
+        self.convs = nn.ModuleList()
+        # channels = [dim_dense[-1]] + dim_channels
         for i in range(len(dim_channels)):
-            self.convsTransposed.append(
+            self.convs.append(
                 nn.Sequential(
-                    nn.ConvTranspose2d(channels[i], channels[i+1], kernel_sizes[i]),
+                    nn.Upsample(scale_factor=4) if i != len(dim_channels)-1 else nn.Upsample(size=dim_img[1:]),
+                    nn.Conv2d(channels[i], channels[i+1], kernel_sizes[i]) if i != len(dim_channels)-1 else nn.Conv2d(channels[i], channels[i+1], kernel_sizes[i]),
                     nn.ELU() if i != len(dim_channels)-1 else nn.Sigmoid()
                 )
             )
@@ -332,11 +342,19 @@ class FilterConvDecoder(nn.Module):
         p=padding and s=stride.
 
         Args:
-            shape (:obj:`list` of :obj:`int`): The input array of shape (#channels, x-size, y-size).
+            shape (:obj:`list` of :obj:`int`): The input array of shape (#channels, x-size, y-size). TODO: wrong
         """
         x = Variable(torch.rand(*shape, 1, 1))
-        for conv in self.convsTransposed:
+        x = x.view(x.size(0), *self.reshape)
+        print("here")
+        print(shape)
+        print(self.reshape)
+        print(x.data.size())
+        print(nn.Upsample(scale_factor=2)(x).data.size())
+        print("Go")
+        for conv in self.convs:
             x = conv(x)
+            print(x.data.size())
         conv_shape = x.data.size()
         
         return conv_shape
@@ -351,12 +369,14 @@ class FilterConvDecoder(nn.Module):
         Returns:
             out (torch.Tensor): The output image.
         """
+        # reshape rep
         # dense layers
         x = self.filter_decoder(x)
         # unflatten output
-        x = x.view(x.size(0), x.size(1), 1, 1)
+        # x = x.view(x.size(0), x.size(1), 1, 1)
+        x = x.view(x.size(0), *self.reshape)
         # transposed convolutional layers
-        for conv in self.convsTransposed:
+        for conv in self.convs:
             x = conv(x)
 
         return x
@@ -386,7 +406,7 @@ class iConvAE(nn.Module):
         #:class:`nn.ModuleList` of :class:`FilterConvDecoder`
         self.decoders = nn.ModuleList()
         for i in range(num_interventions):
-            self.decoders.append(FilterConvDecoder(dim_latent, dim_dense_dec, dim_channels_dec, kernel_sizes_dec, dim_img))
+            self.decoders.append(FilterConvDecoder(dim_latent, dim_dense_dec, dim_channels_dec, kernel_sizes_dec, dim_img, reshape=(32, 2, 2)))
     
     def forward(self, x, intervention):
         """
